@@ -1,5 +1,5 @@
 ---
-
+import CanvasComponent from "../components/Canvas"
 ---
 
 <html lang="en">
@@ -11,6 +11,21 @@
 		<title>Astro</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<div class="section">
+
+			<CanvasComponent client:only="react" letter="matias" cssClass="m"/>
+		</div>
+	
 	</body>
 </html>
+
+<style>
+	.section {
+		/* display: flex; */
+		/* gap: 1rem; */
+		height: 50dvh;
+
+	}
+
+	
+</style>
