@@ -1,47 +1,64 @@
 /** @jsxImportSource react */
 
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import Badge from "./Badge";
-import { Center, Float } from "@react-three/drei";
+import { Center } from "@react-three/drei";
 import { useControls } from "leva";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useIsVisible } from "../hooks/isVisible";
 
-const styles: CSSProperties = {};
+const styles: CSSProperties = {
+  height: "100vh",
+  display: "block",
+};
 
-const CACHE_VALUE = "not-centered";
-
-export default function CanvasComponent({
+function Cnvas({
   letter = "M",
-  cssClass,
+  top = false,
+  yPosition,
+  cache,
+  chordLen = 0,
 }: {
   letter: string;
-  cssClass?: string;
+  top?: boolean;
+  cache?: string;
+  yPosition: number;
+  chordLen?: number;
 }) {
   const { debug } = useControls({ debug: false });
-  const [keycache, setChache] = useState<string | null>(null);
+
+  return (
+    <>
+      <ambientLight intensity={Math.PI} />
+      <Center position={[0, yPosition, 0]} top={top}>
+        <group position={[0, 0, 0]}>
+          <Physics debug={debug} timeStep={1 / 60}>
+            {letter.split("").map((l, i) => (
+              <Badge key={l + i.toString()} letter={l} position={i} chordLen={chordLen} />
+            ))}
+          </Physics>
+        </group>
+      </Center>
+    </>
+  );
+}
+
+export default function CanvasComponent({ letter = "M" }: { letter: string; cssClass?: string }) {
+  const [position, setPosition] = useState<number>(0);
   const canvasRef = useRef(null);
   const isCanvasVisible = useIsVisible(canvasRef);
 
   useEffect(() => {
-    if (isCanvasVisible) {
-      return setChache("canvas-center-key");
-    }
-
-    // return () => setChache("not-center");
-  }, [isCanvasVisible]);
+    setTimeout(() => setPosition(4), 100);
+  }, []);
 
   return (
-    <Canvas style={styles} ref={canvasRef}>
-      <ambientLight intensity={Math.PI} />
-      <Center cacheKey={keycache} top>
-        {letter.split("").map((l, i) => (
-          <Physics key={l + i.toString()} debug={debug} timeStep={1 / 60}>
-            <Badge letter={l} position={i} />
-          </Physics>
-        ))}
-      </Center>
-    </Canvas>
+    <>
+      <Canvas style={styles} ref={canvasRef} camera={{ position: [0, 0, 35], fov: 15 }}>
+        <Cnvas letter={"ferraro"} top={isCanvasVisible} yPosition={position} chordLen={2} />
+        <Cnvas letter={letter} top={isCanvasVisible} yPosition={position} />
+      </Canvas>
+    </>
   );
 }

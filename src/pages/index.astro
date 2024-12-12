@@ -11,20 +11,40 @@ import CanvasComponent from "../components/Canvas"
 		<title>Astro</title>
 	</head>
 	<body>
-		<div class="section">
 
-			<CanvasComponent client:only="react" letter="matias" cssClass="m"/>
-		</div>
+		<section>
+			<nav>
+				Logo
+				<ul>
+					<li>home</li>
+					<li>blog</li>
+				</ul>
+			</nav>
+			<div class="section">
+				<CanvasComponent client:only="react" letter="matias" cssClass="m"/>
+			</div>
+		</section>
 	
 	</body>
 </html>
 
 <style>
 	.section {
-		/* display: flex; */
-		/* gap: 1rem; */
-		height: 50dvh;
+		/* height: 100dvh; */
+		position: relative;
 
+	}
+
+
+	nav {
+		display: flex;
+		justify-content: space-between;
+
+		ul{
+			display: flex;
+			justify-content: space-between;
+			width: 30%;
+		}
 	}
 
 	

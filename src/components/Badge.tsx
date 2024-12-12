@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
-import { extend, useFrame, useThree } from "@react-three/fiber";
+import { extend, useFrame } from "@react-three/fiber";
 import {
   BallCollider,
   CuboidCollider,
@@ -23,7 +23,13 @@ const segmentProps = {
   linearDamping: 2,
 } as const;
 
-export default function Badge({ maxSpeed = 50, minSpeed = 10, letter = "M", position = 0 }) {
+export default function Badge({
+  maxSpeed = 50,
+  minSpeed = 10,
+  letter = "M",
+  position = 0,
+  chordLen = 0,
+}) {
   // References for the band and the joints
   const band = useRef<THREE.Mesh<MeshLineGeometry, MeshLineMaterial>>(null);
   const fixed = useRef<RapierRigidBody>(null);
@@ -53,7 +59,7 @@ export default function Badge({ maxSpeed = 50, minSpeed = 10, letter = "M", posi
 
   // Connect band joints
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], chordLen]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
 
   // Connect card to band
@@ -128,58 +134,53 @@ export default function Badge({ maxSpeed = 50, minSpeed = 10, letter = "M", posi
 
   return (
     <>
-      <group position={[0, 14, 0]}>
-        {/* Band */}
-        <RigidBody ref={fixed} type="fixed" position={[position, 0, 0]} />
-        <RigidBody position={[0.1, 0, 0]} {...segmentProps} ref={j1}>
-          <BallCollider args={[0.1]} />
-        </RigidBody>
-        <RigidBody position={[1, 0, 0]} {...segmentProps} ref={j2}>
-          <BallCollider args={[0.1]} />
-        </RigidBody>
-        <RigidBody position={[0.5, 0, 0]} {...segmentProps} ref={j3}>
-          <BallCollider args={[0.1]} />
-        </RigidBody>
+      {/* Band */}
+      <RigidBody ref={fixed} type="fixed" position={[position, 0, 0]} />
+      <RigidBody position={[0.1, 0, 0]} {...segmentProps} ref={j1}>
+        <BallCollider args={[0.1]} />
+      </RigidBody>
+      <RigidBody position={[1, 0, 0]} {...segmentProps} ref={j2}>
+        <BallCollider args={[0.1]} />
+      </RigidBody>
+      <RigidBody position={[0.5, 0, 0]} {...segmentProps} ref={j3}>
+        <BallCollider args={[0.1]} />
+      </RigidBody>
 
-        <mesh ref={band}>
-          <meshLineGeometry />
-          <meshLineMaterial
-            color="black"
-            depthTest={false}
-            useMap={0}
-            repeat={new THREE.Vector2(2, 1)}
-            lineWidth={0.005}
-          />
-        </mesh>
+      <mesh ref={band}>
+        <meshLineGeometry />
+        <meshLineMaterial
+          color="black"
+          depthTest={false}
+          useMap={0}
+          repeat={new THREE.Vector2(1, 1)}
+          lineWidth={0.05}
+        />
+      </mesh>
 
-        {/* Card */}
-        <RigidBody ref={card} {...segmentProps} type={dragged ? "kinematicPosition" : "dynamic"}>
-          <CuboidCollider args={[1, 0.2, 0.01]} />
-          <Center top>
-            <Text3D
-              curveSegments={50}
-              bevelEnabled
-              bevelSize={0.04}
-              bevelThickness={0.1}
-              height={0}
-              lineHeight={0}
-              letterSpacing={0}
-              size={1}
-              position={[0, 0, 0]}
-              font="./assets/Inter_bold.json"
-              onPointerOver={() => hover(true)}
-              onPointerOut={() => hover(false)}
-              onPointerUp={() => drag(false)}
-              onPointerDown={(evt) =>
-                card.current &&
-                drag(new THREE.Vector3().copy(evt.point).sub(vec.copy(card.current.translation())))
-              }>
-              {letter.toUpperCase()}
-              <meshNormalMaterial />
-            </Text3D>
-          </Center>
-        </RigidBody>
-      </group>
+      {/* Card */}
+
+      <RigidBody ref={card} {...segmentProps} type={dragged ? "kinematicPosition" : "dynamic"}>
+        <CuboidCollider args={[3, 1, 0.01]} />
+        <Center>
+          <Text3D
+            curveSegments={20}
+            bevelEnabled
+            bevelSize={0.15} // Bevel ajustado para letras más grandes
+            bevelThickness={0.2}
+            size={1}
+            font="./assets/Inter_bold.json"
+            onPointerOver={() => hover(true)}
+            onPointerOut={() => hover(false)}
+            onPointerUp={() => drag(false)}
+            onPointerDown={(evt) =>
+              card.current &&
+              drag(new THREE.Vector3().copy(evt.point).sub(vec.copy(card.current.translation())))
+            }>
+            {letter.toUpperCase()}
+            <meshNormalMaterial />
+          </Text3D>
+        </Center>
+      </RigidBody>
     </>
   );
 }
